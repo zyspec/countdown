@@ -9,10 +9,11 @@
 #
 
 CREATE TABLE countdown_events (
-    id int(11) NOT NULL auto_increment,
-    uid int(11) NOT NULL default '0',
-    name varchar(50) NOT NULL default '',
-    description mediumtext NOT NULL,
-    enddatetime int NOT NULL default '0',
-    PRIMARY KEY (id)
-) ENGINE=MyISAM;
+  id          INT(11)     NOT NULL AUTO_INCREMENT,
+  uid         INT(11)     NOT NULL DEFAULT '0',
+  name        VARCHAR(50) NOT NULL DEFAULT '',
+  description MEDIUMTEXT  NOT NULL,
+  enddatetime INT         NOT NULL DEFAULT '0',
+  PRIMARY KEY (id)
+)
+  ENGINE = MyISAM;
