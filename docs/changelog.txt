@@ -1,0 +1,23 @@
+0.30 Alpha 1 [NOT RELEASED]  Dev: Xoops 2.5.11-Beta1, PHP 7.2
+=================================
+<!-- TODO:
+  - add stats block (active countdowns, expired countdowns, total countdowns, total users, etc)
+  - add admin interface to be able to purge/delete user countdowns
+  -->
+- added namespace support (\XoopsModules\Countdow)
+- added ./preloads to support namespace & autoloader support
+- added CdCalendar and Common (Configurator, FilesManagement, VersionChecks) classes
+- added Constants interface
+- added LICENSE and COUNTRIBUTING.md files
+- added missing index.html to folders
+- added oninstall, onupdate, onuninstall scripts
+- added ./docs/changelog.txt
+- added bootstrap compatible templates (see README.md in ./extras folder)
+- refactored ./index.php to remove embedded functions
+- changed display of calendar to use \XoopsFormDateTime element
+- changed date calculations to use PHP DateTime class(es)
+- moved images to ./assets/images directory
+- updated Event(Handler) classes
+- updated module logo to use "blue" badge & new image
+- updated legacy template(s)
+- updated README.md
