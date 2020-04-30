@@ -1,429 +1,261 @@
 <?php
+/*
+ You may not change or alter any portion of this comment or credits of
+ supporting developers from this source code or any supporting source code
+ which is considered copyrighted (c) material of the original comment or credit
+ authors.
+
+ This program is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ */
+/**
+ * Module: xForms
+ *
+ * @package   \XoopsModules\Countdown
+ * @license   https://www.gnu.org/licenses/gpl-2.0.html GNU Public License
+ * @copyright Copyright (c) 2001-2020 {@link https://xoops.org XOOPS Project}
+ * @author    XOOPS Module Development Team
+ * @link      https://github.com/XoopsModules25x/countdown
+ * @since     0.30
+ */
+
+use Xmf\Request;
+use XoopsModules\Countdown\Constants;
+use XoopsModules\Countdown\CdCalendar;
+
 require_once __DIR__ . '/header.php';
 
-$op    = '';
-$sort  = '';
-$order = '';
-
-if (isset($_GET['op'])) {
-    $op = $_GET['op'];
+/** @var \XoopModules\Countdown\Helper $helper */
+if (!$GLOBALS['xoopsUser'] || !$GLOBALS['xoopsUser'] instanceof \XoopsUser || $GLOBALS['xoopsUser']->isGuest()) {
+    redirect_header(XOOPS_URL . '/user.php', Constants::REDIRECT_DELAY_MEDIUM, _NOPERM);
 }
 
-if (isset($_POST['cmdAddCountdown'])) {
-    $op = 'cmdAddCountdown';
-}
+$sort  = $order = '';
 
-if (isset($_POST['cmdEditCountdown'])) {
-    $op = 'cmdEditCountdown';
-}
+$op = Request::getString('op', '', 'GET');
+$op = Request::hasVar('cmdAddCountdown', 'POST') ? 'cmdAddCountdown' : $op;
+$op = Request::hasVar('cmdEditCountdown', 'POST') ? 'cmdEditCountdown' : $op;
+$op = Request::hasVar('cmdRemoveCountdown', 'POST') ? 'cmdRemoveCountdown' : $op;
 
-if (isset($_POST['cmdRemoveCountdown'])) {
-    $op = 'cmdRemoveCountdown';
-}
-
-if ($xoopsUser) {
-    $uid = $xoopsUser->getVar('uid');
-} else {
-    redirect_header(XOOPS_URL . '/user.php', 3, _NOPERM);
-}
+$uid = $GLOBALS['xoopsUser']->uid();
 
 switch ($op) {
-    case 'add':
-        $GLOBALS['xoopsOption']['template_main'] = 'countdown_add.tpl';            // Set template
-        require XOOPS_ROOT_PATH . '/header.php';                   //Include the page header
-        addCountdown($uid);
-        require XOOPS_ROOT_PATH . '/footer.php';                   //Include the page footer
+    case 'add':  // add a new countdown
+    case 'edit': // edit an existing countdown
+        $tpl = 'edit' == $op ? 'countdown_edit.tpl' : 'countdown_add.tpl';
+        $GLOBALS['xoopsOption']['template_main'] = $tpl;
+        require XOOPS_ROOT_PATH . '/header.php';
+
+        $cdCal = new CdCalendar();
+        $cId   = Request::getInt('id', 0, 'GET');
+        if (0 < $cId) {
+            $eventHandler = $helper->getHandler('Event');
+            $eventObj     = $eventHandler->get($cId);
+            if (!$eventObj instanceof \XoopsModules\Countdown\Event) {
+                $helper->redirect('index.php', Constants::REDIRECT_DELAY_MEDIUM, _COUNTDOWN_ERR_BAD_ID);
+            } elseif ($uid !== $eventObj->getVar('uid')) {
+                $helper->redirect('index.php', Constants::REDIRECT_DELAY_MEDIUM, _COUNTDOWN_ERR_NOT_OWNER);
+            }
+
+            $GLOBALS['xoopsTpl']->assign('cd_current_file', basename(__FILE__));
+            $GLOBALS['xoTheme']->addScript('browse.php?Frameworks/jquery/jquery.js');
+            $GLOBALS['xoTheme']->addScript('browse.php?Frameworks/jquery/plugins/jquery.ui.js');
+
+            $dtzObj      = new \DateTimeZone((string)($GLOBALS['xoopsUser']->timezone() * 100));
+            $dateTimeObj = new \DateTime();
+            $dateTimeObj->setTimezone($dtzObj);
+            $dateTimeObj->setTimestamp($eventObj->getVar('enddatetime'));
+            $hours       = $dateTimeObj->format('h');
+            $minutes     = $dateTimeObj->format('i');
+            $AMPM        = $dateTimeObj->format('A');
+            $endDate     = $dateTimeObj->format('m/d/Y');
+            $calObj      = new \XoopsFormDateTime('', 'dtDateTime', $size = 15, $dateTimeObj->getTimestamp(), false);
+            $cal_ele     = $calObj->render();
+
+            /** var \XoopsSecurity $GLOBALS['xoopsSecurity'] */
+            $GLOBALS['xoopsTpl']->assign([
+                'countdown_id'          => $eventObj->getVar('id'),
+                'countdown_name'        => $eventObj->getVar('name'),
+                'countdown_description' => $eventObj->getVar('description'),
+                'countdown_enddatetime' => $endDate,
+                'hour_dropdown'         => $cdCal::renderHourCombo($hours),
+                'minute_dropdown'       => $cdCal::renderMinuteCombo($minutes),
+                'ampm_dropdown'         => $cdCal::renderAMPMCombo($AMPM),
+                'cal_element'           => $cal_ele,
+                'security_token'        => $GLOBALS['xoopsSecurity']->getTokenHTML()
+
+
+            ]);
+        } else { // adding new event/countdown
+
+            $dtzObj      = new \DateTimeZone((string)($GLOBALS['xoopsUser']->timezone() * 100));
+            $dateIntObj  = new \DateInterval('P1D'); // 1 day
+            $dateTimeObj = new \DateTime();
+            $dateTimeObj->setTimestamp(userTimeToServerTime(time(), $GLOBALS['xoopsUser']->timezone()));
+            $dateTimeObj->setTimezone($dtzObj);
+            $dateTimeObj->add($dateIntObj);
+            $hours   = $dateTimeObj->format('h');
+            $minutes = $dateTimeObj->format('i');
+            $AMPM    = $dateTimeObj->format('A');
+            $endDate = $dateTimeObj->format('m/d/Y');
+            $calObj = new \XoopsFormDateTime('', 'dtDateTime', $size = 15, $dateTimeObj->getTimestamp(), false);
+            $cal_ele = $calObj->render();
+
+            /** var \XoopsSecurity $GLOBALS['xoopsSecurity'] */
+            $GLOBALS['xoopsTpl']->assign([
+                'cd_current_file' => basename(__FILE__),
+                'current_date'    => $endDate,
+                'cd_current_time' => formatTimestamp(time(), 'F j, Y, g:i a'),
+                'hour_dropdown'   => $cdCal::renderHourCombo($hours),
+                'minute_dropdown' => $cdCal::renderMinuteCombo($minutes),
+                'ampm_dropdown'   => $cdCal::renderAMPMCombo($AMPM),
+                'cal_element'     => $cal_ele,
+                'security_token'  => $GLOBALS['xoopsSecurity']->getTokenHTML()
+            ]);
+        }
+
+        //Start the output buffer
+        ob_start();
+        include_once XOOPS_ROOT_PATH . '/include/calendar.js';
+        $datetime_js = ob_get_contents();
+        ob_clean();
         break;
-    case 'cmdAddCountdown':
-        cmdAddCountdown($_POST, $uid);                                        //Add a new countdown
-    // no break
-    case 'cmdEditCountdown':
-        cmdEditCountdown($_POST, $uid);                                        //Edit a countdown
-    // no break
-    case 'cmdRemoveCountdown':
-        cmdRemoveCountdown($_POST, $uid);                                    //Remove a countdown
-    // no break
-    case 'edit':
-        $GLOBALS['xoopsOption']['template_main'] = 'countdown_edit.tpl';        //Set template
-        require XOOPS_ROOT_PATH . '/header.php';                            //Include the page header
-        editCountdown($uid, $_GET['id']);
-        require XOOPS_ROOT_PATH . '/footer.php';                            //Include the page footer
+    case 'cmdAddCountdown': //Add a new countdown event
+    case 'cmdEditCountdown': // Edit an existing countdown event
+        //check to make sure this is from known location w/ token
+        if (!$GLOBALS['xoopsSecurity']->check()) {
+            redirect_header($_SERVER['SCRIPT_NAME'], Constants::REDIRECT_DELAY_MEDIUM, implode('<br>', $GLOBALS['xoopsSecurity']->getErrors()));
+        }
+        $inpDate     = Request::getArray('dtDateTime', '', 'POST');
+        $dtzObj      = new \DateTimeZone((string)($GLOBALS['xoopsUser']->timezone() * 100));
+        $dateTimeObj = DateTime::createFromFormat(_SHORTDATESTRING, $inpDate['date'], $dtzObj);
+        $bPM         = Constants::OPTION_PM == Request::getInt('cboAMPM', Constants::OPTION_AM, 'POST') ? true : false;
+        $hours       = Request::getInt('cboHour', 0, 'POST');
+        $hours       = $hours % 12; // normalize time to 12 hr clock
+        $hours       = $bPM ? $hours + 12 : $hours; // add 12 hrs for PM time
+        $minutes     = Request::getInt('cboMinute', 0, 'POST');
+        $seconds     = 0;
+        $dateTimeObj->setTime($hours, $minutes, $seconds);
+        $timestamp = $dateTimeObj->getTimestamp();
+
+        $eventHandler = $helper->getHandler('Event');
+        $cId          = Request::getInt('txtCountdownID', 0, 'POST');
+        $eventObj     = $eventHandler->get($cId); // creates object if doesn't exist
+        $isNew        = $eventObj->isNew();
+        $eventObj->setVars([
+            'uid'         => $uid,
+            'name'        => Request::getString('txtName', '', 'POST'),
+            'description' => Request::getString('txtDescription', '', 'POST'),
+            'enddatetime' => $timestamp
+        ]);
+        $message = $eventHandler->insert($eventObj) ? $isNew ? _COUNTDOWN_MSG_CREATED : _COUNTDOWN_MSG_UPDATED : _COUNTDOWN_ERR_SAVE;
+        $helper->redirect('index.php', Constants::REDIRECT_DELAY_MEDIUM, $message);
+        break;
+    case 'cmdRemoveCountdown': // Remove a countdown event
+        $id = Request::getInt('txtCountdownID', 0, 'POST');
+        if (!Request::hasVar('ok', 'POST') || 1 !== Request::getInt('ok', 0, 'POST')) {
+            $eventObj = $helper->getHandler('Event')->get($id);
+            if (!$eventObj instanceof \XoopsModules\Countdown\Event) {
+                $helper->redirect('index.php', Constants::REDIRECT_DELEAY_MEDIUM, _COUNTDOWN_ERR_BAD_ID);
+            } elseif ($eventObj->getVar('uid') !== $GLOBALS['xoopsUser']->uid()) {
+                $helper->redirect('index.php', Constants::REDIRECT_DELAY_MEDIUM, _COUNTDOWN_ERR_NOT_OWNER);
+            }
+            require XOOPS_ROOT_PATH . '/header.php';
+            xoops_confirm(['ok' => Constants::CONFIRM_OK, 'txtCountdownID' => $id, 'cmdRemoveCountdown' => 1], $helper->url('index.php'), sprintf(_COUNTDOWN_MSG_DEL_CONFIRM, $eventObj->getVar('name')), _YES);
+            break;
+        }
+        // check security
+        if (!$GLOBALS['xoopsSecurity']->check()) {
+            $helper->redirect('index.php', Constants::REDIRECT_DELAY_MEDIUM, implode('<br>', $GLOBALS['xoopsSecurity']->getErrors()));
+        }
+        $eventHandler = $helper->getHandler('Event');
+        $eventObj     = $eventHandler->get(Request::getInt('txtCountdownID', 0, 'POST'));
+        $message      = $eventHandler->delete($eventObj) ? _COUNTDOWN_MSG_DELETED  : _COUNTDOWN_ERR_DEL;
+        $helper->redirect('index.php', Constants::REDIRECT_DELAY_MEDIUM, $message);
         break;
     default:
-        $GLOBALS['xoopsOption']['template_main'] = 'countdown_index.tpl';        // Set template
-        require XOOPS_ROOT_PATH . '/header.php';                   //Include the page header
-        $hCountdown = xoops_getModuleHandler('countdown', 'countdown');
+        $GLOBALS['xoopsOption']['template_main'] = 'countdown_index.tpl';
+        require XOOPS_ROOT_PATH . '/header.php';
+
+        $helper->loadLanguage('modinfo');
+        $cdCal = new CdCalendar();
 
         //Determine which column to sort on
-        if (isset($_GET['sort'])) {
-            $sort = $_GET['sort'];
-            switch ($sort) {
-                case 'name':
-                    break;
-                case 'description':
-                    break;
-                case 'enddatetime':
-                    break;
-                case 'remaining':
-                    $sort = 'enddatetime';
-                    break;
-                default:
-                    $sort = 'name, description';
-                    break;
-            }
-        } else {
-            $sort = 'name';
+        $sort = Request::hasVar('sort', 'GET') ? '' : 'name';
+        $sort = Request::getCmd('sort', $sort, 'GET');
+        switch ($sort) {
+            case 'name':
+                break;
+            case 'description':
+                break;
+            case 'enddatetime':
+                break;
+            case 'remaining':
+                $sort = 'enddatetime';
+                break;
+            default:
+                $sort = 'name, description';
+                break;
         }
 
-        if (isset($_GET['order'])) {
-            $order = $_GET['order'];
-            if ('ASC' === $order) {
-                $order = 'DESC';
-            } else {
-                $order = 'ASC';
-            }
-        } else {
-            $oder = 'ASC';
-        }
+        $order = Request::getString('order', 'ASC', 'GET');
+        $order = 'ASC' == $order ? 'DESC' : 'ASC'; // toggle sort order
 
-        $crit = new CriteriaCompo(new Criteria('uid', $uid));
+        $criteria = new \CriteriaCompo(new Criteria('uid', $uid));
 
         if ('all' === $op) {
+            $sub_title = _MI_MENU_VIEW_ALL;
             //Do nothing, we want to view all
         } elseif ('expired' === $op) {
-            $crit->add(new Criteria('enddatetime', time(), '<='));
+            $sub_title = _MI_MENU_VIEW_EXPIRED;
+            $criteria->add(new Criteria('enddatetime', time(), '<='));
         } else {
+            $sub_title = _MI_MENU_VIEW_CURRENT;
             //This is the default action, to hide anything expired
-            $crit->add(new Criteria('enddatetime', time(), '>='));
+            $criteria->add(new Criteria('enddatetime', time(), '>='));
         }
-        $crit->setSort($sort);
-        $crit->setOrder($order);
 
-        if (!$events = $hCountdown->getEventsByUser($crit)) {
+        $GLOBALS['xoopsTpl']->assign('sub_title', $sub_title);
+
+        $criteria->setSort($sort);
+        $criteria->order = $order; // forced write directly to 'order' var due to bug in XOOPS core <= 2.5.10
+
+        $eventHandler  = $helper->getHandler('Event');
+        $eventObjArray = $eventHandler->getAll($criteria);
+        if (!$events = $eventHandler->getEventsByUser($criteria)) {
             //Do Nothing...yet
         }
 
-        foreach ($events as $event) {
-            $description = $event->getVar('description');
-            if (strlen($description) >= 50) {
-                $description = xoops_substr($description, 0, 50);
+        $cd_events = [];
+        foreach ($eventObjArray as $eventObj) {
+            $description = $eventObj->getVar('description');
+            if (Constants::MAXIMUM_DESC_LENGTH <= strlen($description)) {
+                $description = xoops_substr($description, 0, Constants::MAXIMUM_DESC_LENGTH);
             }
+
+            $dtzObj      = new \DateTimeZone((string)($GLOBALS['xoopsUser']->timezone() * 100));
+            $dateTimeObj = new \DateTime();
+            $dateTimeObj->setTimezone($dtzObj);
+            $dateTimeObj->setTimestamp($eventObj->getVar('enddatetime'));
 
             $cd_events[] = [
-                'id'            => $event->getVar('id'),
-                'uid'           => $event->getVar('uid'),
-                'name'          => $event->getVar('name'),
+                'id'            => $eventObj->getVar('id'),
+                'uid'           => $eventObj->getVar('uid'),
+                'name'          => $eventObj->getVar('name'),
                 'description'   => $description,
-                'enddatetime'   => date('F j, Y, g:i a', $event->getVar('enddatetime')),
-                'remainingtime' => $event->remaining()
+                'enddatetime'   => $dateTimeObj->format('F j, Y, g:i a'),
+//                'enddatetime'   => date('F j, Y, g:i a', $eventObj->getVar('enddatetime')),
+                'remainingtime' => $eventObj->remaining()
             ];
         }
-        unset($events);
+        unset($eventObjArray, $eventObj);
 
-        if (!isset($cd_events)) {
-            $cd_events = null;
-        }
-
-        $xoopsTpl->assign('cd_events', $cd_events);
-        $xoopsTpl->assign('cd_sort_order', $order);
-        require XOOPS_ROOT_PATH . '/footer.php';                   //Include the page footer
+        $GLOBALS['xoopsTpl']->assign([
+            'cd_events'     => $cd_events,
+            'cd_sort_order' => $order
+        ]);
         break;
 }
+require XOOPS_ROOT_PATH . '/footer.php'; //Include the page footer
 
-/**
- * @param $uid
- */
-function addCountdown($uid)
-{
-    global $xoopsTpl;
-
-    if ($uid <= 0) {
-        redirect_header(XOOPS_URL . '/user.php', 3, _NOPERM);
-    } else {
-        $xoopsTpl->assign('cd_current_file', basename(__FILE__));
-        $xoopsTpl->assign('cd_current_time', formatTimestamp(time(), 'F j, Y, g:i a'));
-        $xoopsTpl->assign('hour_dropdown', DrawHourCombo());
-        $xoopsTpl->assign('minute_dropdown', DrawMinuteCombo());
-        $xoopsTpl->assign('ampm_dropdown', DrawAMPMCombo());
-
-        //Start the output buffer
-        ob_start();
-        include_once XOOPS_ROOT_PATH . '/include/calendarjs.php';
-
-        $datetime_js = ob_get_contents();
-        $xoopsTpl->assign('xoops_module_header', $datetime_js);
-        $xoopsTpl->assign('current_date', date('Y-m-d', time()));
-        ob_clean();
-    }
-}
-
-/**
- * @param $postvars
- * @param $uid
- */
-function cmdEditCountdown($postvars, $uid)
-{
-    $hCountdown = xoops_getModuleHandler('countdown', 'countdown');
-    $oCountdown = $hCountdown->create();
-
-    $bHasDate = false;
-    $bPM      = false;
-
-    $oCountdown->setVar('id', $postvars['txtCountdownID']);
-    $oCountdown->setVar('uid', $uid);
-    $oCountdown->setVar('name', $postvars['txtName']);
-    $oCountdown->setVar('description', $postvars['txtDescription']);
-
-    if (isset($postvars['dtDateTime'])) {
-        $split_date = explode('-', $postvars['dtDateTime']);
-    }
-
-    if (3 == count($split_date)) {
-        $month    = $split_date[1];
-        $day      = $split_date[2];
-        $year     = $split_date[0];
-        $bHasDate = true;
-    }
-
-    $bPM = (!$postvars['cboAMPM']);
-
-    //If it is PM then add 12 hours to the time
-    if (false === $bPM) {
-        $hours = $postvars['cboHour'];
-    } else {
-        $hours = $postvars['cboHour'] + 12;
-    }
-
-    $minutes = $postvars['cboMinute'];
-    $seconds = 0;
-
-    if ('24' == $hours) {
-        $day -= 1;
-    }
-
-    if ($bHasDate) {
-        global $xoopsUser;
-
-        $userTimezone = $xoopsUser->getVar('timezone_offset');
-        $iDate        = mktime($hours, $minutes, $seconds, $month, $day, $year);
-        $iDate        = userTimeToServerTime($iDate, $userTimezone);
-
-        $oCountdown->setVar('enddatetime', $iDate);
-        if ($hCountdown->insert($oCountdown)) {
-            $message = 'Countdown updated successfully!';
-        } else {
-            $message = 'Errors while saving Countdown.';
-        }
-    } else {
-        $message = 'Date format is incorrect.' . "\n" . 'Countdown was not saved.';
-    }
-
-    redirect_header('index.php', 3, $message);
-}
-
-/**
- * @param $postvars
- * @param $uid
- */
-function cmdRemoveCountdown($postvars, $uid)
-{
-    $hCountdown = xoops_getModuleHandler('countdown', 'countdown');
-    $oCountdown =& $hCountdown->get($postvars['txtCountdownID']);
-    if ($hCountdown->delete($oCountdown)) {
-        $sMessage = 'Countdown removed successfully!';
-    } else {
-        $sMessage = 'Errors while removing countdown.';
-    }
-
-    redirect_header('index.php', 3, $sMessage);
-}
-
-/**
- * @param $postvars
- * @param $uid
- */
-function cmdAddCountdown($postvars, $uid)
-{
-    $hCountdown = xoops_getModuleHandler('countdown', 'countdown');
-    $oCountdown = $hCountdown->create();
-
-    $bHasDate = false;
-    $bPM      = false;
-
-    //Set the object's properties
-    $oCountdown->setVar('uid', $uid);
-    $oCountdown->setVar('name', $postvars['txtName']);
-    $oCountdown->setVar('description', $postvars['txtDescription']);
-
-    if (isset($postvars['dtDateTime'])) {
-        $split_date = explode('-', $postvars['dtDateTime']);
-    }
-
-    if (3 == count($split_date)) {
-        $month    = $split_date[1];
-        $day      = $split_date[2];
-        $year     = $split_date[0];
-        $bHasDate = true;
-    }
-
-    $bPM = (!$postvars['cboAMPM']);
-
-    //If it is PM then add 12 hours to the time
-    if (false === $bPM) {
-        $hours = $_POST['cboHour'];
-    } else {
-        $hours = $_POST['cboHour'] + 12;
-    }
-
-    $minutes = $_POST['cboMinute'];
-    $seconds = 0;
-
-    if ('24' == $hours) {
-        $day -= 1;
-    }
-
-    if ($bHasDate) {
-        global $xoopsUser;
-
-        $userTimezone = $xoopsUser->getVar('timezone_offset');
-        $iDate        = mktime($hours, $minutes, $seconds, $month, $day, $year);
-        $iDate        = userTimeToServerTime($iDate, $userTimezone);
-
-        $oCountdown->setVar('enddatetime', $iDate);
-        if ($hCountdown->insert($oCountdown)) {
-            $message = 'Countdown added successfully!';
-        } else {
-            $message = 'Errors while saving Countdown.';
-        }
-    } else {
-        $message = 'Date format is incorrect.' . "\n" . 'Countdown not saved.';
-    }
-
-    redirect_header('index.php', 3, $message);
-}
-
-/**
- * @param $uid
- * @param $countdownID
- */
-function editCountdown($uid, $countdownID)
-{
-    global $xoopsTpl;
-
-    if ($uid <= 0) {
-        redirect_header(XOOPS_URL . '/user.php', 3, _NOPERM);
-    } elseif ($countdownID <= 0) {
-        redirect_header('index.php?op=add', 3, _NOPERM);
-    } else {
-        $hCountdown = xoops_getModuleHandler('countdown', 'countdown');
-        $oCountdown = $hCountdown->get($countdownID);
-        $xoopsTpl->assign('cd_current_file', basename(__FILE__));
-
-        //Start the output buffer
-        ob_start();
-        $jstime = formatTimestamp('F j Y, H:i:s', $oCountdown->getVar('enddatetime'));
-        include_once XOOPS_ROOT_PATH . '/include/calendarjs.php';
-
-        $datetime_js = ob_get_contents();
-        ob_clean();
-
-        $xoopsTpl->assign('xoops_module_header', $datetime_js);
-        $xoopsTpl->assign('countdown_id', $oCountdown->getVar('id'));
-        $xoopsTpl->assign('countdown_name', $oCountdown->getVar('name'));
-        $xoopsTpl->assign('countdown_description', $oCountdown->getVar('description'));
-        $xoopsTpl->assign('countdown_enddatetime', date('Y-m-d', $oCountdown->getVar('enddatetime')));
-
-        //echo date("i", $oCountdown->getVar('enddatetime'));
-
-        $xoopsTpl->assign('hour_dropdown', DrawHourCombo(date('h', $oCountdown->getVar('enddatetime'))));
-        $xoopsTpl->assign('minute_dropdown', DrawMinuteCombo(date('i', $oCountdown->getVar('enddatetime'))));
-        $xoopsTpl->assign('ampm_dropdown', DrawAMPMCombo(date('A', $oCountdown->getVar('enddatetime'))));
-    }
-}
-
-/**
- * @param string $lSelect
- * @return string
- */
-function DrawHourCombo($lSelect = '-1')
-{
-    $sTemp    = "<select name='cboHour'>";
-    $selected = '';
-
-    for ($i = 1; $i <= 12; $i++) {
-        if ($lSelect == $i) {
-            $selected = 'SELECTED';
-        } else {
-            $selected = '';
-        }
-        $sTemp .= '<option value="' . $i . '" ' . $selected . '>' . $i . '</option>';
-    }
-    $sTemp .= '</select>';
-
-    return $sTemp;
-}
-
-/**
- * @param string $lSelect
- * @return string
- */
-function DrawMinuteCombo($lSelect = '-1')
-{
-    $sTemp    = "<select name='cboMinute'>";
-    $selected = '';
-    $lSum     = 0;
-
-    for ($i = 0; $lSum <= 50; $i++) {
-        if (0 == $i) {
-            $sTemp .= '<option value="' . '00' . '" ' . $selected . '>00</option>';
-        } else {
-            $lSum += 5;
-
-            if ($lSelect == $lSum) {
-                $selected = 'SELECTED';
-            } else {
-                $selected = '';
-            }
-
-            $sTemp .= '<option value="' . $lSum . '" ' . $selected . '>' . $lSum . '</option>';
-        }
-    }
-    $sTemp .= '</select>';
-
-    return $sTemp;
-}
-
-/**
- * @param string $sSelect
- * @return string
- */
-function DrawAMPMCombo($sSelect = 'AM')
-{
-    $sTemp = "<select name='cboAMPM'>";
-
-    if ('AM' === $sSelect) {
-        $sTemp .= '<option value="0" SELECTED>AM</option>';
-    } else {
-        $sTemp .= '<option value="0">AM</option>';
-    }
-
-    if ('PM' === $sSelect) {
-        $sTemp .= '<option value="1" SELECTED>PM</option>';
-    } else {
-        $sTemp .= '<option value="1">PM</option>';
-    }
-
-    $sTemp .= '</select>';
-
-    return $sTemp;
-}
-
-/**
- * @param $obj
- */
-function DrawObject($obj)
-{
-    echo '<pre>';
-    print_r($obj);
-    echo '</pre>';
-}
