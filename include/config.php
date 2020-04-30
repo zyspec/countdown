@@ -17,59 +17,67 @@
  * @author    XOOPS Development Team
  * @link      https://github.com/XoopsModules25x/countdown
  */
-function getConfig()
-{
-    $moduleDirName      = basename(dirname(__DIR__));
-    $moduleDirNameUpper = mb_strtoupper($moduleDirName);
-    return (object)[
-        'name'           => mb_strtoupper($moduleDirName) . ' Module Configurator',
-        'paths'          => [
-            'dirname'    => $moduleDirName,
-            'admin'      => XOOPS_ROOT_PATH . '/modules/' . $moduleDirName . '/admin',
-            'modPath'    => XOOPS_ROOT_PATH . '/modules/' . $moduleDirName,
-            'modUrl'     => XOOPS_URL . '/modules/' . $moduleDirName,
-            'uploadPath' => XOOPS_UPLOAD_PATH . '/' . $moduleDirName,
-            'uploadUrl'  => XOOPS_UPLOAD_URL . '/' . $moduleDirName,
-        ],
-        'uploadFolders'  => [
-            //        constant($moduleDirNameUpper . '_UPLOAD_PATH'),
-            //        constant($moduleDirNameUpper . '_UPLOAD_PATH') . '/category',
-            //        constant($moduleDirNameUpper . '_UPLOAD_PATH') . '/screenshots',
-        ],
-        'copyBlankFiles' => [
-            //        constant($moduleDirNameUpper . '_UPLOAD_PATH'),
-            //        constant($moduleDirNameUpper . '_UPLOAD_PATH') . '/category',
-            //        constant($moduleDirNameUpper . '_UPLOAD_PATH') . '/screenshots',
-        ],
-        'copyTestFolders' => [
-            //        constant($moduleDirNameUpper . '_UPLOAD_PATH'),
-            //        [
-            //            constant($moduleDirNameUpper . '_PATH') . '/testdata/images',
-            //            constant($moduleDirNameUpper . '_UPLOAD_PATH') . '/images',
-            //        ]
-        ],
-        'templateFolders' => [
-            '/templates/',
-            //'/templates/admin/',
-            //'/templates/blocks/',
-        ],
-        'oldFiles'        => [
-            '/images/logo.png',
-            '/countdown_screeny.png',
-            'class/countdown.php',
-            '/templates/countdown_add.html',
-            '/templates/countdown_edit.html',
-            '/templates/countdown_index.html',
-        ],
-        'oldFolders'      => [
-            '/images',
-            //'/css',
-            //'/js',
-            //'/tcpdf',
-        ],
-        'renameTables'    => [//         'XX_archive'     => 'ZZZZ_archive',
-        ],
-        'modCopyright' => "<a href='https://xoops.org' target='_blank'>"
-        . "<img src='" . \Xmf\Module\Admin::iconUrl('xoopsmicrobutton.gif') . "' alt='XOOPS Project' title='XOOPS Project'></a>",
+
+$moduleDirName      = basename(dirname(__DIR__));
+$moduleDirNameUpper = mb_strtoupper($moduleDirName);
+return (object)[
+    'name'           => mb_strtoupper($moduleDirName) . ' Module Configurator',
+    'paths'          => [
+        'dirname'    => $moduleDirName,
+        'admin'      => XOOPS_ROOT_PATH . '/modules/' . $moduleDirName . '/admin',
+        'modPath'    => XOOPS_ROOT_PATH . '/modules/' . $moduleDirName,
+        'modUrl'     => XOOPS_URL . '/modules/' . $moduleDirName,
+        'uploadPath' => XOOPS_UPLOAD_PATH . '/' . $moduleDirName,
+        'uploadUrl'  => XOOPS_UPLOAD_URL . '/' . $moduleDirName,
+    ],
+    'icons'          => [
+    //    'icons' => [
+        //'edit'    => "<img src='" . $pathIcon16 . "/edit.png'  alt=" . _EDIT . "' align='middle'>",
+        //'delete'  => "<img src='" . $pathIcon16 . "/delete.png' alt='" . _DELETE . "' align='middle'>",
+        //'add'     => "<img src='" . $pathIcon16 . "/add.png' alt='" . _ADD . "' align='middle'>",
+        //'0'       => "<img src='" . $pathIcon16 . "/0.png' alt='" . 0 . "' align='middle'>",
+        //'1'       => "<img src='" . $pathIcon16 . "/1.png' alt='" . 1 . "' align='middle'>",
+    ],
+    'uploadFolders'  => [
+        //        constant($moduleDirNameUpper . '_UPLOAD_PATH'),
+        //        constant($moduleDirNameUpper . '_UPLOAD_PATH') . '/category',
+        //        constant($moduleDirNameUpper . '_UPLOAD_PATH') . '/screenshots',
+    ],
+    'copyBlankFiles' => [
+        //        constant($moduleDirNameUpper . '_UPLOAD_PATH'),
+        //        constant($moduleDirNameUpper . '_UPLOAD_PATH') . '/category',
+        //        constant($moduleDirNameUpper . '_UPLOAD_PATH') . '/screenshots',
+    ],
+    'copyTestFolders' => [
+        //        constant($moduleDirNameUpper . '_UPLOAD_PATH'),
+        //        [
+        //            constant($moduleDirNameUpper . '_PATH') . '/testdata/images',
+        //            constant($moduleDirNameUpper . '_UPLOAD_PATH') . '/images',
+        //        ]
+    ],
+    'templateFolders' => [
+        '/templates/',
+        //'/templates/admin/',
+        //'/templates/blocks/',
+    ],
+    'oldFiles'        => [
+        '/images/logo.png',
+        '/countdown_screeny.png',
+        '/class/countdown.php',
+        '/templates/countdown_add.html',
+        '/templates/countdown_edit.html',
+        '/templates/countdown_index.html',
+    ],
+    'oldFolders'      => [
+        '/images',
+        //'/css',
+        //'/js',
+        //'/tcpdf',
+    ],
+    'renameTables'    => [//         'XX_archive'     => 'ZZZZ_archive',
+    ],
+    'moduleStats'  => [
+    ],
+    'modCopyright' => "<a href='https://xoops.org' target='_blank'>"
+    . "<img src='" . \Xmf\Module\Admin::iconUrl('xoopsmicrobutton.gif') . "' alt='XOOPS Project - " . ucfirst($moduleDirName) . "' title='XOOPS Project - " . ucfirst($moduleDirName) . "'></a>"
 ];
-}
