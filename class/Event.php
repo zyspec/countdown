@@ -1,38 +1,47 @@
 <?php
 
-/**
- * Class countdownCountdown
+namespace XoopsModules\Countdown;
+
+/*
+ You may not change or alter any portion of this comment or credits of
+ supporting developers from this source code or any supporting source code
+ which is considered copyrighted (c) material of the original comment or credit
+ authors.
+
+ This program is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
-class countdownCountdown extends XoopsObject
+/**
+ * Module: Countdown
+ *
+ * @package   \XoopsModules\Countdown
+ * @license   https://www.gnu.org/licenses/gpl-2.0.html GNU Public License
+ * @copyright Copyright (c) 2001-2020 {@link https://xoops.org XOOPS Project}
+ * @author    XOOPS Module Development Team
+ * @link      https://github.com/XoopsModules25x/countdown
+ * @since     0.30
+ */
+
+use XoopsModules\Countdown\CdCalendar;
+
+/**
+ * Class Countdown\Event
+ */
+class Event extends \XoopsObject
 {
     /**
-     * countdownCountdown constructor.
+     * Countdown Event constructor.
      * @param null $id
      */
     public function __construct($id = null)
     {
-        //function initVar($key, $data_type, $value = null, $required = false, $maxlength = null, $options = '')
+        parent::__construct();
         $this->initVar('id', XOBJ_DTYPE_INT, null, true);
-        $this->initVar('uid', XOBJ_DTYPE_INT, null, true);                      // will store Xoops user id
+        $this->initVar('uid', XOBJ_DTYPE_INT, null, true); // stores XOOPS user id
         $this->initVar('name', XOBJ_DTYPE_TXTBOX, null, true, 50);
         $this->initVar('description', XOBJ_DTYPE_TXTAREA, null, true);
         $this->initVar('enddatetime', XOBJ_DTYPE_INT, null, true);
-
-        if (isset($id)) {
-            if (is_array($id)) {
-                $this->assignVars($id);
-            }
-        } else {
-            $this->setNew();
-        }
-    }
-
-    /**
-     * @return bool
-     */
-    public function isNew()
-    {
-        return ($this->getVar('id') < 1);
     }
 
     /**
@@ -49,83 +58,7 @@ class countdownCountdown extends XoopsObject
      */
     public function remaining()
     {
-        return countdownFormatTime($this->getVar('enddatetime') - time());
+        return CdCalendar::formatTime($this->getVar('enddatetime'));
+        //return CdCalendar::formatTime($this->getVar('enddatetime') - time());
     }
 }    //End of countdown class
-
-/**
- * Class countdownCountdownHandler
- */
-class countdownCountdownHandler extends XoopsPersistableObjectHandler
-{
-    public $db;
-    public $classname = countdowncountdown::class;
-    public $dbtable   = 'countdown_events';
-
-    /**
-     * countdownCountdownHandler constructor.
-     * @param $db
-     */
-    public function __construct(\XoopsDatabase $db)
-    {
-        parent::__construct($db, 'countdown_events', countdowncountdown::class, 'id', 'id');
-    }
-
-    /**
-     * @param $db
-     * @return countdownHandler
-     */
-    public static function getInstance($db)
-    {
-        static $instance;
-        if (!isset($instance)) {
-            $instance = new static($db);
-        }
-        return $instance;
-    }
-
-    /**
-     * @param      $crit
-     * @param bool $id_as_key
-     * @return array
-     */
-    public function getEventsByUser($crit, $id_as_key = false)
-    {
-        $sql = $this->_selectQuery($crit, true);
-        if (is_object($crit)) {
-            $limit = $crit->getLimit();
-            $start = $crit->getStart();
-        }
-
-        $ret = $this->db->query($sql, $limit, $start);
-        $arr = [];
-        while ($temp = $this->db->fetchArray($ret)) {
-            $countdownEvent = $this->create();
-            $countdownEvent->assignVars($temp);
-            if ($id_as_key) {
-                $arr[$countdownEvent->getVar('id')] = $countdownEvent;
-            } else {
-                $arr[] = $countdownEvent;
-            }
-            unset($countdownEvent);
-        }
-        return $arr;
-    }
-
-    /**
-     * @param null $criteria
-     * @return string
-     */
-    public function _selectQuery($criteria = null)
-    {
-        $sql = sprintf('SELECT * FROM %s', $this->db->prefix($this->dbtable));
-
-        if (isset($criteria) && is_subclass_of($criteria, 'criteriaelement')) {
-            $sql .= ' ' . $criteria->renderWhere();
-            if ('' != $criteria->getSort()) {
-                $sql .= ' ORDER BY ' . $criteria->getSort() . ' ' . $criteria->getOrder();
-            }
-        }
-        return $sql;
-    }
-}

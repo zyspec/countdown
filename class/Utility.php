@@ -38,8 +38,64 @@ class Utility
 {
     use Common\VersionChecks; //checkVerXoops, checkVerPhp Traits
 
+    use Common\FilesManagement; // Files Management Trait
+
+
     /** @var array errs list of errors */
     public static $errs = [];
+
+    /**
+     * Create folder & index.html file
+     *
+     * @param string $folder The full path of the directory to create
+     * @return bool
+     */
+    public static function createFolder($folder)
+    {
+        $success = true;
+        try {
+            if (!file_exists($folder)) {
+                if (!is_dir($folder) && !mkdir($folder) && !is_dir($folder)) {
+                    $errMsg = sprintf('Unable to create the %s directory', $folder);
+                    throw new \RuntimeException($errMsg);
+                    self::setErrors($errMsg, false);
+                    $success = false;
+                }
+                if (false === file_put_contents($folder . '/index.html', '<script>history.go(-1);</script>')) {
+                    $errMsg = "Unable to create {$folder}/index.html";
+                    self::setErrors($errMsg, false);
+                    $success = false;
+                }
+            }
+        } catch (\Exception $e) {
+            $errMsg = sprintf("Caught exception: %s", $e->getMessage());
+            $success = false;
+            sself::setErrors($errMsg, false);
+            echo $errMsg;
+        } finally {
+            return $success;
+        }
+    }
+
+    /**
+     * @param $file
+     * @param $folder
+     * @return bool
+     */
+    public static function copyFile($file, $folder)
+    {
+        return copy($file, $folder);
+        //        try {
+        //            if (!is_dir($folder)) {
+        //                throw new \RuntimeException(sprintf('Unable to copy file as: %s ', $folder));
+        //            } else {
+        //                return copy($file, $folder);
+        //            }
+        //        } catch (\Exception $e) {
+        //            echo 'Caught exception: ', $e->getMessage(), "\n", "<br>";
+        //        }
+        //        return false;
+    }
 
     /**
      * Set errors for the Utility class
@@ -73,4 +129,18 @@ class Utility
 
         return static::$errs;
     }
+    /**
+     * @param  array $errors
+     * @return string
+     */
+    public static function getHtmlErrors($errors = [])
+    {
+        $ret = '';
+        foreach ($errors as $key => $value) {
+            $ret .= '\n<br> - ' . $value;
+        }
+
+        return $ret;
+    }
+
 }
