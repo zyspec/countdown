@@ -47,10 +47,10 @@ class Configurator
     public function __construct()
     {
 
-        $config = include dirname(dirname(__DIR__)) . '/include/config.php';
-
+        $config = require dirname(dirname(__DIR__)) . '/include/config.php';
         $this->name            = $config->name;
         $this->paths           = $config->paths;
+        $this->icons           = $config->icons;
         $this->uploadFolders   = $config->uploadFolders;
         $this->copyBlankFiles  = $config->copyBlankFiles;
         $this->copyTestFolders = $config->copyTestFolders;
