@@ -210,8 +210,8 @@ class CdCalendar
     {
         $tz          = false;
         if ($GLOBALS['xoopsUser'] instanceof \XoopsUser) {
-            $dtzObj      = new DateTimeZone((string)($GLOBALS['xoopsUser']->timezone() * 100));
-            $dateTimeObj = DateTime::createFromFormat($format, $inpDate, $dtzObj);
+            $dtzObj      = new \DateTimeZone((string)($GLOBALS['xoopsUser']->timezone() * 100));
+            $dateTimeObj = \DateTime::createFromFormat($format, $inpDate, $dtzObj);
             $bPM         = Constants::OPTION_PM == $inpTime['PM'] ? true : false;
             $hours       = array_key_exists('hours', $inpTime) ? $inpTime['hours'] % 12 : 0; // normalize time to 12 hr clock
             $hours       = $bPM ? $hours + 12 : $hours; // add 12 hrs for PM time
