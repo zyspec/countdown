@@ -27,8 +27,8 @@
 /**  @var array $modversion */
 $modversion['name']           = _MI_COUNTDOWN_NAME;
 $modversion['version']        = '0.3';
-$modversion['module_status']  = 'Alpha 1';
-$modversion['release_date']   = '2020/04/30';
+$modversion['module_status']  = 'Alpha 2';
+$modversion['release_date']   = '2020/05/01';
 $modversion['description']    = _MI_COUNTDOWN_DESC;
 $modversion['credits']        = 'Eric Juden (ejuden01)';
 $modversion['author']         = 'Alan Juden (ajuden)';

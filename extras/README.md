@@ -1,4 +1,4 @@
-![Countdown Module](../assets/images/logoModules.png)
+![Countdown Module](../assets/images/logoModule.png)
 # Countdown Module Templates for XOOPS
 [![XOOPS CMS Module](https://img.shields.io/badge/XOOPS%20CMS-Module-blue.svg)](https://xoops.org)
 [![Template License](https://img.shields.io/badge/license-CC%20BY-yellowgreen.svg?style=flat)](https://creativecommons.org/licenses/by/4.0/legalcode)
