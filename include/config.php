@@ -67,9 +67,12 @@ return (object)[
         '/templates/countdown_add.html',
         '/templates/countdown_edit.html',
         '/templates/countdown_index.html',
+        '/templates/countdown_add.tpl',
+        '/templates/countdown_edit.tpl',
     ],
     'oldFolders'      => [
         '/images',
+        '/extras/themes/bootstrap'
         //'/css',
         //'/js',
         //'/tcpdf',

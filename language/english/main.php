@@ -1,7 +1,9 @@
 <?php
 define('_CD_TEXT_COUNTDOWNS', 'Countdown Events');
 define('_CD_TEXT_NAME', 'Event Name');
+define('_CD_TEXT_NAME_PLACEHOLDER', 'Enter Countdown Name');
 define('_CD_TEXT_DESCRIPTION', 'Description');
+define('_CD_TEXT_DESC_PLACEHOLDER', 'Enter Description');
 define('_CD_TEXT_EXPIRATION', 'Expiration Date/Time');
 define('_CD_TEXT_REMAINING', 'Remaining Time');
 define('_CD_TEXT_ADD_EVENT', 'Add Countdown');

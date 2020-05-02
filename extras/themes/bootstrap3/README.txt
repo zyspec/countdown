@@ -1,0 +1,1 @@
+Please use the ./extras/themes/bootsrap4/ templates for bootstrap3 themes too. 

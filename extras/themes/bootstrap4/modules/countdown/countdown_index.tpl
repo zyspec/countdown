@@ -54,7 +54,6 @@
 				<form>
 					<button type="submit" class="btn btn-primary" name="cmdEditCountdown" id="cmdEditCountdown"><{$smarty.const._CD_TEXT_ADD_EVENT}></button>
 					<input type="hidden" name="op" value="add" />
-<{*  				<a href="./index.php?op=add"><{$smarty.const._CD_TEXT_ADD_EVENT}></a> *}>
 				</form>
 			</td>
 		</tr>

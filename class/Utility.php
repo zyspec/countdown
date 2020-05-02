@@ -70,7 +70,7 @@ class Utility
         } catch (\Exception $e) {
             $errMsg = sprintf("Caught exception: %s", $e->getMessage());
             $success = false;
-            sself::setErrors($errMsg, false);
+            self::setErrors($errMsg, false);
             echo $errMsg;
         } finally {
             return $success;

@@ -13,8 +13,9 @@
 - added oninstall, onupdate, onuninstall scripts
 - added ./docs/changelog.txt
 - added bootstrap compatible templates (see README.md in ./extras folder)
-- refactored ./index.php to remove embedded functions
+- refactored ./index.php to remove embedded functions and improve code maintainability
 - changed display of calendar to use \XoopsFormDateTime element
+- replaced add/edit templates with a single 'entry' template for both add/edit
 - changed date calculations to use PHP DateTime class(es)
 - moved images to ./assets/images directory
 - updated Event(Handler) classes

@@ -28,7 +28,7 @@
 $modversion['name']           = _MI_COUNTDOWN_NAME;
 $modversion['version']        = '0.3';
 $modversion['module_status']  = 'Alpha 2';
-$modversion['release_date']   = '2020/05/01';
+$modversion['release_date']   = '2020/05/02';
 $modversion['description']    = _MI_COUNTDOWN_DESC;
 $modversion['credits']        = 'Eric Juden (ejuden01)';
 $modversion['author']         = 'Alan Juden (ajuden)';
@@ -63,10 +63,8 @@ $modversion['tables'][0] = 'countdown_events';
 $modversion['templates'] = [
     ['file'        => 'countdown_index.tpl',
      'description' => _MI_CD_TEMP_COUNTDOWN],
-    ['file'        => 'countdown_add.tpl',
-     'description' => _MI_CD_TEMP_COUNTDOWN_ADD],
-    ['file'        => 'countdown_edit.tpl',
-     'description' => _MI_CD_TEMP_COUNTDOWN_EDIT]
+    ['file'        => 'countdown_entry.tpl',
+     'description' => _MI_CD_TEMP_COUNTDOWN_ENTRY],
 ];
 
 // Menu - only show for registered XOOPS users
