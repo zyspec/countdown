@@ -12,7 +12,7 @@
 > These files are located in the ``/countdown/templates`` folder.
 
 ## Legacy Templates
-> The module's legacy templates are include as the default templates for use with XOOPS. These templates include layout and CSS for display with the default and classic templates.
+> The module's legacy templates are included as the default templates for use with XOOPS. These templates include layout and CSS for display with the default and classic templates.
 * These templates are used by default - the administrator/webmaster does not need to do anything to the XOOPS or module installation to use these templates.
 * These templates may be used 'as-is'. Changes, if desired, may be made to the templates and/or theme CSS to modify the module's information display to meet the site's requirements. It is recommended the administrator use the XOOPS template interface in the XOOPS Admin panel (Admin->Modules->System->Templates) to modify module templates.
 
