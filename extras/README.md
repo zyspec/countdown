@@ -23,7 +23,7 @@
 
 >The bootsrap templates are located in the module's `./extras/themes`. The folders follow a naming convention so the templates located in the `bootstrap3` folder are compatible with themes based on the bootstrap3 component library. Likewise, templates located in the `bootstrap4` folder are to be used with themes based on bootstrap 4.
 
->###Install Bootstrap Templates
+>### Install Bootstrap Templates
 >To use these templates the site administrator must follow these steps:
 >#### Option I:
 > If the administrator is planning to use Bootstrap enabled theme(s) only then the module's bootsrap templates can be copied directly into the module's templates folder. The advantage of this method is that the templates do not have to be copied to the modules folder for each theme used. There are a couple of disadvantages of this method however.
