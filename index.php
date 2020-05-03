@@ -17,7 +17,6 @@
  * @copyright Copyright (c) 2001-2020 {@link https://xoops.org XOOPS Project}
  * @author    XOOPS Module Development Team
  * @link      https://github.com/XoopsModules25x/countdown
- * @since     0.30
  */
 
 use Xmf\Request;
@@ -78,7 +77,6 @@ switch ($op) {
             $endDate = $dateTimeObj->format('m/d/Y');
             $calObj  = new \XoopsFormDateTime('', 'dtDateTime', $size = 15, $dateTimeObj->getTimestamp(), false);
             $cal_ele = $calObj->render();
-
             /** var \XoopsSecurity $GLOBALS['xoopsSecurity'] */
             $GLOBALS['xoopsTpl']->assign([
                 'cd_current_file'       => basename(__FILE__),
@@ -93,12 +91,6 @@ switch ($op) {
                 'ampm_dropdown'         => $cdCal::renderAMPMCombo($AMPM),
                 'cal_element'           => $cal_ele,
             ]);
-
-        //Start the output buffer
-        ob_start();
-        include_once XOOPS_ROOT_PATH . '/include/calendar.js';
-        $datetime_js = ob_get_contents();
-        ob_clean();
         break;
     case 'save': // Save either a new countdown or edit an existing countdown event
         // Check to make sure this is from known location w/ token
@@ -106,6 +98,7 @@ switch ($op) {
             $helper->redirect('index.php', Constants::REDIRECT_DELAY_MEDIUM, implode('<br>', $GLOBALS['xoopsSecurity']->getErrors()));
         }
         $inpDate     = Request::getArray('dtDateTime', '', 'POST');
+        //$dateTimeObj = \DateTime::createFromFormat(_SHORTDATESTRING, $inpDate['date']);
         $dtzObj      = new \DateTimeZone((string)($GLOBALS['xoopsUser']->timezone() * 100));
         $dateTimeObj = \DateTime::createFromFormat(_SHORTDATESTRING, $inpDate['date'], $dtzObj);
         $bPM         = Constants::OPTION_PM == Request::getInt('cboAMPM', Constants::OPTION_AM, 'POST') ? true : false;
@@ -115,7 +108,7 @@ switch ($op) {
         $minutes     = Request::getInt('cboMinute', 0, 'POST');
         $seconds     = 0;
         $dateTimeObj->setTime($hours, $minutes, $seconds);
-        $timestamp = $dateTimeObj->getTimestamp();
+        $timestamp   = $dateTimeObj->getTimestamp();
 
         $eventHandler = $helper->getHandler('Event');
         $cd_id          = Request::getInt('txtCountdownID', 0, 'POST');
@@ -206,6 +199,7 @@ switch ($op) {
         }
 
         $cd_events = [];
+        /** @var \XoopsModules\Countdown\Event $eventObj */
         foreach ($eventObjArray as $eventObj) {
             $description = $eventObj->getVar('description');
             if (Constants::MAXIMUM_DESC_LENGTH <= strlen($description)) {
@@ -223,7 +217,6 @@ switch ($op) {
                 'name'          => $eventObj->getVar('name'),
                 'description'   => $description,
                 'enddatetime'   => $dateTimeObj->format('F j, Y, g:i a'),
-//                'enddatetime'   => date('F j, Y, g:i a', $eventObj->getVar('enddatetime')),
                 'remainingtime' => $eventObj->remaining()
             ];
         }
@@ -235,5 +228,4 @@ switch ($op) {
         ]);
         break;
 }
-require XOOPS_ROOT_PATH . '/footer.php'; //Include the page footer
-
+require XOOPS_ROOT_PATH . '/footer.php';
