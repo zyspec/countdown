@@ -40,12 +40,14 @@ class CdCalendar
      */
     public static function formatTime($time)
     {
+        // First see if it's expired
+        if ($time < time()) {
+            return _COUNTDOWN_MSG_EXPIRED;
+        }
         $values = self::getElapsedTime($time);
-
         foreach ($values as $key => $value) {
             $$key = $value;
         }
-
         $ret = [];
         if ($values['years']) {
             $ret[] = $values['years'] . ' ' . (1 == $values['years'] ? _COUNTDOWN_TIME_YEAR : _COUNTDOWN_TIME_YEARS);
@@ -69,17 +71,7 @@ class CdCalendar
 
         $ret[] = $values['seconds'] . ' ' . (1 == $values['seconds'] ? _COUNTDOWN_TIME_SEC : _COUNTDOWN_TIME_SECS);
 
-        if (($values['years'] < 0)
-            || ($values['weeks'] < 0)
-            || ($values['days'] < 0)
-            || ($values['hours'] < 0)
-            || ($values['minutes'] < 0)
-            || ($values['seconds'] < 0))
-        {
-            return _COUNTDOWN_MSG_EXPIRED;
-        } else {
-            return implode(', ', $ret);
-        }
+        return implode(', ', $ret);
     }
 
     /**
@@ -98,7 +90,7 @@ class CdCalendar
         $ending  = new \DateTime();
         $ending->setTimeZone($dtzObj);
         $ending->setTimestamp($time);
-        $diff = $ending->diff($current);
+        $diff = $ending->diff($current, true);
 
         return [
             'years'   => $diff->y,
@@ -108,27 +100,6 @@ class CdCalendar
             'minutes' => $diff->i,
             'seconds' => $diff->s
         ];
-
-        //Define the units of measure
-        $units = [
-            'years'   => 365 * 60 * 60 * 24 /*Value of Unit expressed in seconds*/,
-            'weeks'   => 7 * 60 * 60 * 24,
-            'days'    => 60 * 60 * 24,
-            'hours'   => 60 * 60,
-            'minutes' => 60,
-            'seconds' => 1
-        ];
-
-        $local_time   = $time;
-        $elapsed_time = [];
-
-        //Calculate the total for each unit measure
-        foreach ($units as $key => $single_unit) {
-            $elapsed_time[$key] = floor($local_time / $single_unit);
-            $local_time         -= ($elapsed_time[$key] * $single_unit);
-        }
-
-        return $elapsed_time;
     }
     /**
      * Create HTML select for Hours
