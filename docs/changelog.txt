@@ -1,9 +1,9 @@
 0.30 Alpha 1 [NOT RELEASED]  Dev: Xoops 2.5.11-Beta1, PHP 7.2
 =================================
 <!-- TODO:
-  - add stats block (active countdowns, expired countdowns, total countdowns, total users, etc)
   - add admin interface to be able to purge/delete user countdowns
   -->
+- add stats block (active countdowns, expired countdowns, total countdowns, total users)
 - added namespace support (\XoopsModules\Countdow)
 - added ./preloads to support namespace & autoloader support
 - added CdCalendar and Common (Configurator, FilesManagement, VersionChecks) classes

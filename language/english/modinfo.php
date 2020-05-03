@@ -8,3 +8,7 @@ define('_MI_MENU_ADD_NEW', 'Create');
 define('_MI_MENU_VIEW_CURRENT', 'View Current');
 define('_MI_MENU_VIEW_ALL', 'View All');
 define('_MI_MENU_VIEW_EXPIRED', 'View Expired');
+
+// Block defines
+define('_MI_COUNTDOWN_BLK_STATS', 'Countdown Stats');
+define('_MI_COUNTDOWN_BLK_STATS_DESC', 'Countdown usage statistics');
