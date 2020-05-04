@@ -1,6 +1,7 @@
 0.30 Alpha 1 [NOT RELEASED]  Dev: Xoops 2.5.11-Beta1, PHP 7.2
 =================================
 <!-- TODO:
+  - add session var to return user to the list of events they were viewing (all, current, expired) 
   - add admin interface to be able to purge/delete user countdowns
   -->
 - add stats block (active countdowns, expired countdowns, total countdowns, total users)
@@ -13,6 +14,7 @@
 - added oninstall, onupdate, onuninstall scripts
 - added ./docs/changelog.txt
 - added bootstrap compatible templates (see README.md in ./extras folder)
+- added automatic removal of events for XOOPS users that have been deleted
 - refactored ./index.php to remove embedded functions and improve code maintainability
 - changed display of calendar to use \XoopsFormDateTime element
 - replaced add/edit templates with a single 'entry' template for both add/edit

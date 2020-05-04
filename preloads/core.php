@@ -20,12 +20,38 @@ defined('XOOPS_ROOT_PATH') || exit('Restricted access');
  */
 class CountdownCorePreload extends \XoopsPreloadItem
 {
+    /**
+     * @var bool session helper
+     */
+    private static $sessionHelper;
+
     // to add PSR-4 autoloader
     /**
-     * @param $args
+     * @param mixed $args
+     * @return void
      */
     public static function eventCoreIncludeCommonEnd($args)
     {
         require_once __DIR__ . '/autoloader.php';
+
+        /**
+         * Sync Countdown users with XOOPS users
+         * - remove Countdown users if not a valid XOOPS user
+         * - only try once per session, successful or not
+         *
+         * @var \Xmf\Module\Helper\Session $sessionHelper
+         * @var \XoopsModules\Countdown\EventHandler $eventHandler
+         */
+        $moduleDirName = basename(dirname(__DIR__));
+        $sessionHelper = new \Xmf\Module\Helper\Session($moduleDirName);
+
+        if (false === $sessionHelper->get('state')) {
+            $eventHandler = new \XoopsModules\Countdown\EventHandler();
+            if (false === ($success = $eventHandler->cleanOrphan($GLOBALS['xoopsDB']->prefix('users'), 'uid', 'uid'))) {
+                trigger_error('The Countdown Event dB table could not be scrubbed.', E_USER_NOTICE);
+            }
+            $sessionHelper->set('state', true);
+        }
+        return;
     }
 }

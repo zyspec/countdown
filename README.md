@@ -18,7 +18,8 @@ Counts down time for user created events.
 
 #### Notes
 1. There is no administration section and there are no configurations (Preferences) for this module.
-2. Bootstrap templates are available in the ``./extras`` folder. See usage instructions in the [README](./extras/README.md)
+2. If a XOOPS user is deleted the Countdown Events for that user are automatically removed. This occurs any time a new session is started. For example - when any user logs in. 
+3. Bootstrap templates are available in the ``./extras`` folder. See usage instructions in the [README](./extras/README.md)
 
 ### How You Can Help
 Create a [GitBook](https://xoops.gitbook.io/) tutorial 
